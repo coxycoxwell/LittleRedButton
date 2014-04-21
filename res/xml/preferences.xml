@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <EditTextPreference
+                android:title="@string/pref_title_username"
+                android:summary="@string/pref_summary_username"
+                android:key="pref_key_username"
+                android:defaultValue=""/>
+    <EditTextPreference
+                android:title="@string/pref_title_message_text"
+                android:summary="@string/pref_summary_message_text"
+                android:key="pref_key_message_text"
+                android:defaultValue="Deneme"/>
+    <CheckBoxPreference
+            android:key="pref_key_track_me"
+            android:summary="@string/pref_summary_track_me"
+            android:title="@string/pref_title_track_me"
+            android:defaultValue="false"/>
+</PreferenceScreen>

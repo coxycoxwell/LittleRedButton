@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">LittleRedButton</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_recipient">Recipient Activity</string>
+    <string name="title_activity_add_recipient">Add Recipient Activity</string>
+    <string name="title_activity_contact">Contact Activity</string>
+	<string name="facebookApplicationId">723569757694229</string>
+	<string name="title_activity_settings">Settings</string>
+	<string name="pref_summary_message_text"></string>
+	<string name="pref_title_message_text">Message Text</string> 
+	<string name="pref_summary_track_me">Notify my current location every 60 seconds</string>
+	<string name="pref_title_track_me">Track me</string>
+	<string name="pref_summary_username">Name to be displayed on e-mail and sms messages</string>
+	<string name="pref_title_username">User Name</string> 
+</resources>

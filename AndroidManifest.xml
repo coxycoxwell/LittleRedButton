@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="tr.edu.boun.swe599.littleredbutton"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="19" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />"
+    <uses-permission android:name="android.permission.INTERNET" />"
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="tr.edu.boun.swe599.littleredbutton.MainActivity"
+            android:label="@string/app_name" 
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="callback"
+                    android:scheme="x-application-littleredbutton-oauth-twitter" />
+        </intent-filter>
+        </activity>
+        <activity
+            android:name="tr.edu.boun.swe599.littleredbutton.recipients.RecipientActivity"
+            android:label="@string/title_activity_recipient">
+        </activity>
+        <activity
+            android:name="tr.edu.boun.swe599.littleredbutton.recipients.AddRecipientActivity"
+            android:label="@string/title_activity_add_recipient" >
+        </activity>
+        <activity
+            android:name="tr.edu.boun.swe599.littleredbutton.recipients.ContactActivity"
+            android:label="@string/title_activity_contact" >
+        </activity>
+        <activity
+            android:name="tr.edu.boun.swe599.littleredbutton.settings.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="tr.edu.boun.swe599.littleredbutton.MainActivity" >
+			<meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="tr.edu.boun.swe599.littleredbutton.MainActivity" />
+        </activity>
+        <activity android:name="com.facebook.LoginActivity"
+                  android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                  android:label="@string/app_name" />
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebookApplicationId"/>
+    </application>
+
+</manifest>
