@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 import tr.edu.boun.swe599.littleredbutton.facebook.FacebookLoginButton;
+import tr.edu.boun.swe599.littleredbutton.mail.AsyncMailSender;
+import tr.edu.boun.swe599.littleredbutton.mail.MailSender;
 import tr.edu.boun.swe599.littleredbutton.recipients.RecipientActivity;
 import tr.edu.boun.swe599.littleredbutton.settings.SettingsActivity;
 import tr.edu.boun.swe599.littleredbutton.twitter.ConnectionDetector;
@@ -163,35 +165,34 @@ public class MainActivity extends Activity implements LocationListener {
 		@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 		@Override
 		public void onClick(View v) {
-
-			prefs = getApplicationContext().getSharedPreferences(
-					"tr.edu.boun.swe599.littleredbutton", Context.MODE_PRIVATE);
-
-			String recipientNameSet = "tr.edu.boun.swe599.littleredbutton.recipientName";
-			String recipientPhoneSet = "tr.edu.boun.swe599.littleredbutton.recipientPhoneSet";
-			String recipientEmailSet = "tr.edu.boun.swe599.littleredbutton.recipientEmailSet";
-
-			nameSet = prefs.getStringSet(recipientNameSet,
-					new HashSet<String>());
-			phoneSet = prefs.getStringSet(recipientPhoneSet,
-					new HashSet<String>());
-			emailSet = prefs.getStringSet(recipientEmailSet,
-					new HashSet<String>());
-
-			final PictureCallback callback = new PictureCallback() {
-				@Override
-				public void onPictureTaken(byte[] data, Camera camera) {
-					try {
-						// async task for storing the photo
-						new SavePhotoTask(getApplicationContext(), data)
-								.execute();
-					} catch (Exception e) {
-						// some exceptionhandling
+			
+			 prefs = getApplicationContext().getSharedPreferences(
+			 "tr.edu.boun.swe599.littleredbutton", Context.MODE_PRIVATE);
+			  
+			  String recipientNameSet =
+			  "tr.edu.boun.swe599.littleredbutton.recipientName"; 
+			  String recipientPhoneSet =
+			  "tr.edu.boun.swe599.littleredbutton.recipientPhoneSet"; 
+			  String recipientEmailSet =
+			  "tr.edu.boun.swe599.littleredbutton.recipientEmailSet";
+			  
+			  nameSet = prefs.getStringSet(recipientNameSet, new HashSet<String>()); 
+			  phoneSet = prefs.getStringSet(recipientPhoneSet, new HashSet<String>());
+			  emailSet = prefs.getStringSet(recipientEmailSet, new HashSet<String>());
+			  
+			  final PictureCallback callback = new PictureCallback() {
+					@Override
+					public void onPictureTaken(byte[] data, Camera camera) {
+						try {
+							// async task for storing the photo
+							new SavePhotoTask(getApplicationContext(), data)
+									.execute();
+						} catch (Exception e) {
+							// some exceptionhandling
+						}
 					}
-				}
-			};
-
-			camera.takePicture(null, null, callback);
+				};
+				camera.takePicture(null, null, callback);
 		}
 	};
 
@@ -209,6 +210,8 @@ public class MainActivity extends Activity implements LocationListener {
 			TwitterWorker tw = new TwitterWorker(MainActivity.this);
 			tw.sendTweet(messageToBeSent, pictureFileName);
 		}
+		
+		new AsyncMailSender(MainActivity.this, getCoordinatesString(), pictureFileName).execute();
 	}
 
 	private OnClickListener recipientsButtonListener = new OnClickListener() {
@@ -234,8 +237,8 @@ public class MainActivity extends Activity implements LocationListener {
 			mAuthTask = new AuthenticationTask();
 			mAuthTask.execute((Void) null);
 		} else {
-			Toast.makeText(this, "Logged out from Twitter",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Logged out from Twitter", Toast.LENGTH_SHORT)
+					.show();
 			twitterSession.logout();
 			updateUI();
 		}
@@ -244,8 +247,9 @@ public class MainActivity extends Activity implements LocationListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		
+		// preference nasýl en baþta yüklenecek?
+		addPreferencesFromResource(R.xml.preferences);
+
 		// do we have a camera?
 		if (!getPackageManager()
 				.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
@@ -371,10 +375,10 @@ public class MainActivity extends Activity implements LocationListener {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		
-		if(requestCode == RESULT_SETTINGS)
+
+		if (requestCode == RESULT_SETTINGS)
 			return;
-		
+
 		uiHelper.onActivityResult(requestCode, resultCode, data, dialogCallback);
 
 		Session session = Session.getActiveSession();
@@ -433,17 +437,17 @@ public class MainActivity extends Activity implements LocationListener {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
+
 	@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.action_settings:
-            Intent i = new Intent(this, SettingsActivity.class);
-            startActivityForResult(i, RESULT_SETTINGS);
-            break; 
-        }
-        return true;
-    }
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_settings:
+			Intent i = new Intent(this, SettingsActivity.class);
+			startActivityForResult(i, RESULT_SETTINGS);
+			break;
+		}
+		return true;
+	}
 
 	public Location getLocation() {
 		try {
@@ -548,8 +552,10 @@ public class MainActivity extends Activity implements LocationListener {
 			infoLabel.setText("Coordinates - Lat: "
 					+ String.valueOf(this.location.getLatitude()) + ", Lon: "
 					+ String.valueOf(this.location.getLongitude()));
-		Toast.makeText(this, "Lat: " + String.valueOf(this.location.getLatitude()) 
-				+ "Lon: " + String.valueOf(this.location.getLatitude()),
+		Toast.makeText(
+				this,
+				"Lat: " + String.valueOf(this.location.getLatitude()) + "Lon: "
+						+ String.valueOf(this.location.getLatitude()),
 				Toast.LENGTH_LONG).show();
 	}
 
@@ -603,20 +609,20 @@ public class MainActivity extends Activity implements LocationListener {
 
 	private void showPublishResult(String message, GraphObject result,
 			FacebookRequestError error) {
-		if (error == null) 
+		if (error == null)
 			Toast.makeText(this, "Post to Facebook success!",
 					Toast.LENGTH_SHORT).show();
-		else 
-			Toast.makeText(this, error.getErrorMessage(),
-					Toast.LENGTH_LONG).show();
+		else
+			Toast.makeText(this, error.getErrorMessage(), Toast.LENGTH_LONG)
+					.show();
 	}
-/*
-	private FacebookDialog.PhotoShareDialogBuilder createShareDialogBuilderForPhoto(
-			Bitmap... photos) {
-		return new FacebookDialog.PhotoShareDialogBuilder(this)
-				.addPhotos(Arrays.asList(photos));
-	}
-*/
+
+	/*
+	 * private FacebookDialog.PhotoShareDialogBuilder
+	 * createShareDialogBuilderForPhoto( Bitmap... photos) { return new
+	 * FacebookDialog.PhotoShareDialogBuilder(this)
+	 * .addPhotos(Arrays.asList(photos)); }
+	 */
 	private void postPhoto() {
 		Bitmap image = BitmapFactory.decodeFile(pictureFileName);
 		if (canPresentShareDialogWithPhotos) {

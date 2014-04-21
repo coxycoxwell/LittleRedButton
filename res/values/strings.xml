@@ -14,5 +14,11 @@
 	<string name="pref_summary_track_me">Notify my current location every 60 seconds</string>
 	<string name="pref_title_track_me">Track me</string>
 	<string name="pref_summary_username">Name to be displayed on e-mail and sms messages</string>
-	<string name="pref_title_username">User Name</string> 
+	<string name="pref_title_username">Display Name</string> 
+
+	<string name="pref_title_mail_settings">GMail Settings</string>
+	<string name="pref_title_mail_user_name">User Name</string>
+	<string name="pref_summary_mail_user_name"></string>
+	<string name="pref_title_mail_password">Password</string>
+	<string name="pref_summary_mail_password"></string>
 </resources>

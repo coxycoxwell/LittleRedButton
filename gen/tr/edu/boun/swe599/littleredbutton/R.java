@@ -1428,9 +1428,14 @@ containing a value of this type.
         public static final int com_facebook_usersettingsfragment_not_logged_in=0x7f09000a;
         public static final int facebookApplicationId=0x7f09002c;
         public static final int hello_world=0x7f090027;
+        public static final int pref_summary_mail_password=0x7f090038;
+        public static final int pref_summary_mail_user_name=0x7f090036;
         public static final int pref_summary_message_text=0x7f09002e;
         public static final int pref_summary_track_me=0x7f090030;
         public static final int pref_summary_username=0x7f090032;
+        public static final int pref_title_mail_password=0x7f090037;
+        public static final int pref_title_mail_settings=0x7f090034;
+        public static final int pref_title_mail_user_name=0x7f090035;
         public static final int pref_title_message_text=0x7f09002f;
         public static final int pref_title_track_me=0x7f090031;
         public static final int pref_title_username=0x7f090033;
