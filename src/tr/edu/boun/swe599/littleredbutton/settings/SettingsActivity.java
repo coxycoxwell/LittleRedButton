@@ -18,9 +18,9 @@ public class SettingsActivity extends PreferenceActivity {
 	@SuppressWarnings({ "deprecation" })
 	private void setupSimplePreferencesScreen() {
 		addPreferencesFromResource(R.xml.preferences);
-		bindPreferenceSummaryToValue(findPreference("pref_key_message_text"));
-		bindPreferenceSummaryToValue(findPreference("pref_key_username"));
-		// Gmail settings için de bind yapýlmasý gerekiyor password için swe599 al!!!
+		//bindPreferenceSummaryToValue(findPreference("pref_key_message_text"));
+		//bindPreferenceSummaryToValue(findPreference("pref_key_username"));
+		bindPreferenceSummaryToValue(findPreference("pref_key_mail_user_name"));
 	}
 
 	/**

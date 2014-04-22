@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -45,12 +46,37 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 				  
 		emailSet = prefs.getStringSet(recipientEmailSet, new HashSet<String>());
 		
-		m.set_user(sharedPrefs.getString("pref_key_mail_user_name", null));
-		m.set_pass(sharedPrefs.getString("pref_key_mail_password", null));
-		m.set_from(sharedPrefs.getString("pref_key_username", null));
+		String mailUser = sharedPrefs.getString("pref_key_mail_user_name", null);
+		if(mailUser == null || mailUser.equals(""))
+			mailUser = "redlittlebutton@gmail.com";
+		m.set_user(mailUser);
+		
+		String mailPassword = sharedPrefs.getString("pref_key_mail_password", null);
+		if(mailPassword == null || mailPassword.equals(""))
+			mailPassword = "QazWsxEdc";
+		m.set_pass(mailPassword);
+		
+		String mailFrom = sharedPrefs.getString("pref_key_username", null);
+		TelephonyManager tMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		String mailPhoneNumber = tMgr.getLine1Number();
+		
+		if(mailFrom == null || mailFrom.equals(""))
+			mailFrom = "Little Red Button Member";
+		m.set_from(mailFrom);
 		
 		m.set_subject("URGENT HELP NEEDED!"); // email subject
-		m.set_body(sharedPrefs.getString("pref_key_message_text", null) + "\n" + coordinates); // email body
+		
+		String mailBody = sharedPrefs.getString("pref_key_message_text", null);
+		if(mailBody == null || mailBody.equals("")) 
+			mailBody = "Hi!\n";
+		else
+			mailBody += "\n\nHi!\n";
+		mailBody += mailFrom + " (Phone Number: " + mailPhoneNumber + ") may need your help!\n";
+		mailBody += "His/Her current " + coordinates + "\n";
+		mailBody += "You may find, if it is available, a view of the scene in the attachment that he/she is currently at\n";
+		mailBody += "\nLittleRedButton Team";
+		
+		m.set_body(mailBody); // email body
 
 		//String[] toArr = { "ggurkas@live.com", "ggurkas@yahoo.com" };
 		m.setTo(emailSet.toArray(new String[emailSet.size()]));

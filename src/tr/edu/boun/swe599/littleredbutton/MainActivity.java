@@ -47,7 +47,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -159,7 +161,7 @@ public class MainActivity extends Activity implements LocationListener {
 	private TextView infoLabel;
 
 	private Camera camera;
-	String pictureFileName;
+	private String pictureFileName;
 
 	private OnClickListener littleRedButtonListener = new OnClickListener() {
 		@TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -197,21 +199,36 @@ public class MainActivity extends Activity implements LocationListener {
 	};
 
 	private void startNotifications() {
+		
+		Toast.makeText(this, "Starting to send notifications...",
+				Toast.LENGTH_SHORT).show();
+		
 		Session session = Session.getActiveSession();
 		boolean facebookInUse = (session != null && session.isOpened());
 		boolean twitterInUse = twitterSession.isTwitterLoggedInAlready();
 
 		getLocation();
 
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		String postBody = sharedPrefs.getString("pref_key_message_text", null);
+		if(postBody == null || postBody.equals("")) 
+			postBody = "Hi!\n";
+		else
+			postBody += "\n\nHi!\n";
+		postBody += "I need your help!\n";
+		postBody += "My current " + getCoordinatesString() + "\n";
+		postBody += "You may find, if it is available, a view of the scene in the attachment that I am currently at\n";
+
 		if (facebookInUse)
 			performPublish(PendingAction.POST_PHOTO,
 					canPresentShareDialogWithPhotos);
 		if (twitterInUse) {
 			TwitterWorker tw = new TwitterWorker(MainActivity.this);
-			tw.sendTweet(messageToBeSent, pictureFileName);
+			tw.sendTweet(getPostBody(), getPictureFileName());
 		}
 		
-		new AsyncMailSender(MainActivity.this, getCoordinatesString(), pictureFileName).execute();
+		new AsyncMailSender(MainActivity.this, getCoordinatesString(), getPictureFileName()).execute();
 	}
 
 	private OnClickListener recipientsButtonListener = new OnClickListener() {
@@ -247,9 +264,22 @@ public class MainActivity extends Activity implements LocationListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// preference nasýl en baþta yüklenecek?
-		addPreferencesFromResource(R.xml.preferences);
 
+		// get shared preferences
+		SharedPreferences pref = PreferenceManager
+				.getDefaultSharedPreferences(getApplicationContext());
+
+		// first time run?
+		if (pref.getBoolean("firstTimeRun", true)) {
+			// start the preferences activity
+			startActivity(new Intent(getBaseContext(), SettingsActivity.class));
+			// get the preferences editor
+			SharedPreferences.Editor editor = pref.edit();
+			// avoid for next run
+			editor.putBoolean("firstTimeRun", false);
+			editor.commit();
+		}
+		
 		// do we have a camera?
 		if (!getPackageManager()
 				.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
@@ -573,10 +603,10 @@ public class MainActivity extends Activity implements LocationListener {
 
 	public String getCoordinatesString() {
 		if (location != null)
-			return "Coordinates: Latitude:" + location.getLatitude()
+			return "coordinates: Latitude:" + location.getLatitude()
 					+ ", Longitude:" + location.getLongitude()
 					+ " http://maps.google.com/?q=" + location.getLatitude()
-					+ ", " + location.getLongitude();
+					+ "," + location.getLongitude();
 		else
 			return "";
 	}
@@ -624,7 +654,7 @@ public class MainActivity extends Activity implements LocationListener {
 	 * .addPhotos(Arrays.asList(photos)); }
 	 */
 	private void postPhoto() {
-		Bitmap image = BitmapFactory.decodeFile(pictureFileName);
+		Bitmap image = BitmapFactory.decodeFile(getPictureFileName());
 		if (canPresentShareDialogWithPhotos) {
 			// FacebookDialog shareDialog =
 			// createShareDialogBuilderForPhoto(image).build();
@@ -643,12 +673,29 @@ public class MainActivity extends Activity implements LocationListener {
 					});
 
 			Bundle parameters = request.getParameters();
-			parameters.putString("message", messageToBeSent);
+						
+			parameters.putString("message", getPostBody());
 			request.setParameters(parameters);
 			request.executeAsync();
 		} else {
 			pendingAction = PendingAction.POST_PHOTO;
 		}
+	}
+	
+	private String getPostBody()
+	{
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+		String postBody = sharedPrefs.getString("pref_key_message_text", null);
+		if(postBody == null || postBody.equals("")) 
+			postBody = "Hi!\n";
+		else
+			postBody += "\n\nHi!\n";
+		postBody += "I need your help!\n";
+		postBody += "My current " + getCoordinatesString() + "\n";
+		postBody += "You may find, if it is available, a view of the scene in the attachment that I am currently at\n";
+
+		return postBody;
 	}
 
 	private boolean hasPublishPermission() {
@@ -680,6 +727,14 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	}
 
+	String getPictureFileName() {
+		return pictureFileName;
+	}
+
+	void setPictureFileName(String pictureFileName) {
+		this.pictureFileName = pictureFileName;
+	}
+
 	public class SavePhotoTask extends AsyncTask<Boolean, Void, File> implements
 			PictureCallback {
 
@@ -698,8 +753,6 @@ public class MainActivity extends Activity implements LocationListener {
 		@Override
 		protected File doInBackground(Boolean... params) {
 			try {
-				Toast.makeText(this.ctx, "Taking picture of the scene...",
-						Toast.LENGTH_SHORT).show();
 				camera.takePicture(null, null, this);
 				Thread.sleep(1000);
 			} catch (Exception e) {
@@ -710,8 +763,6 @@ public class MainActivity extends Activity implements LocationListener {
 
 		@Override
 		protected void onPostExecute(File result) {
-			Toast.makeText(this.ctx, "Starting to send notifications...",
-					Toast.LENGTH_SHORT).show();
 			startNotifications();
 		}
 
@@ -729,12 +780,12 @@ public class MainActivity extends Activity implements LocationListener {
 			String date = dateFormat.format(new Date());
 			String photoFile = "Picture_" + date + ".jpg";
 
-			pictureFileName = pictureFileDir.getPath() + File.separator
-					+ photoFile;
+			setPictureFileName(pictureFileDir.getPath() + File.separator
+					+ photoFile);
 
 			try {
 				// I guess you know how to save a file
-				File pictureFile = new File(pictureFileName);
+				File pictureFile = new File(getPictureFileName());
 
 				try {
 					FileOutputStream fos = new FileOutputStream(pictureFile);

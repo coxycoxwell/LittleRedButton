@@ -73,7 +73,8 @@ public class MailSender extends javax.mail.Authenticator {
 	 
 	      MimeMessage msg = new MimeMessage(session); 
 	 
-	      msg.setFrom(new InternetAddress(_from)); 
+	      //msg.setFrom(new InternetAddress(_from)); 
+	      msg.setFrom(new InternetAddress(_user, _from));
 	       
 	      InternetAddress[] addressTo = new InternetAddress[_to.length]; 
 	      for (int i = 0; i < _to.length; i++) { 

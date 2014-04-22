@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-
     <EditTextPreference
-        android:defaultValue="Deneme"
+        android:defaultValue=""
         android:key="pref_key_message_text"
         android:summary="@string/pref_summary_message_text"
         android:title="@string/pref_title_message_text" />
-
     <PreferenceScreen
-        android:dependency="pref_key_send_mail"
         android:key="button_pref_key_mail_category"
         android:persistent="false"
-        android:title="@string/pref_title_mail_settings" >
+        android:title="@string/pref_title_mail_settings" 
+        android:summary="@string/pref_summary_mail_settings" >
         <EditTextPreference
             android:defaultValue=""
             android:key="pref_key_mail_user_name"
