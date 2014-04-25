@@ -3,6 +3,7 @@ package tr.edu.boun.swe599.littleredbutton;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -13,8 +14,11 @@ import java.util.Set;
 import tr.edu.boun.swe599.littleredbutton.facebook.FacebookLoginButton;
 import tr.edu.boun.swe599.littleredbutton.mail.AsyncMailSender;
 import tr.edu.boun.swe599.littleredbutton.mail.MailSender;
+import tr.edu.boun.swe599.littleredbutton.recipients.MySQLLiteHelper;
+import tr.edu.boun.swe599.littleredbutton.recipients.Recipient;
 import tr.edu.boun.swe599.littleredbutton.recipients.RecipientActivity;
 import tr.edu.boun.swe599.littleredbutton.settings.SettingsActivity;
+import tr.edu.boun.swe599.littleredbutton.sms.AsyncSmsSender;
 import tr.edu.boun.swe599.littleredbutton.twitter.ConnectionDetector;
 import tr.edu.boun.swe599.littleredbutton.twitter.Constants;
 import tr.edu.boun.swe599.littleredbutton.twitter.TwitterSession;
@@ -84,11 +88,12 @@ public class MainActivity extends Activity implements LocationListener {
 	private List<String> recipientEmailList;
 	private List<String> recipientPhoneNumberList;
 
-	private SharedPreferences prefs;
+//	private SharedPreferences prefs;
+	private MySQLLiteHelper db;
 
-	private Set<String> nameSet;
-	private Set<String> phoneSet;
-	private Set<String> emailSet;
+//	private Set<String> nameSet;
+//	private Set<String> phoneSet;
+//	private Set<String> emailSet;
 
 	// flag for GPS status
 	boolean isGPSEnabled = false;
@@ -116,7 +121,7 @@ public class MainActivity extends Activity implements LocationListener {
 	private boolean canPresentShareDialog;
 	private boolean canPresentShareDialogWithPhotos;
 
-	private String messageToBeSent = "Deneme Mesajý!";
+//	private String messageToBeSent = "Deneme Mesajý!";
 
 	public static final int REQUEST_CODE = 100;
 	private static final int RESULT_SETTINGS = 152;
@@ -167,20 +172,19 @@ public class MainActivity extends Activity implements LocationListener {
 		@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 		@Override
 		public void onClick(View v) {
-			
-			 prefs = getApplicationContext().getSharedPreferences(
-			 "tr.edu.boun.swe599.littleredbutton", Context.MODE_PRIVATE);
-			  
-			  String recipientNameSet =
-			  "tr.edu.boun.swe599.littleredbutton.recipientName"; 
-			  String recipientPhoneSet =
-			  "tr.edu.boun.swe599.littleredbutton.recipientPhoneSet"; 
-			  String recipientEmailSet =
-			  "tr.edu.boun.swe599.littleredbutton.recipientEmailSet";
-			  
-			  nameSet = prefs.getStringSet(recipientNameSet, new HashSet<String>()); 
-			  phoneSet = prefs.getStringSet(recipientPhoneSet, new HashSet<String>());
-			  emailSet = prefs.getStringSet(recipientEmailSet, new HashSet<String>());
+//			 prefs = getApplicationContext().getSharedPreferences(
+//			 "tr.edu.boun.swe599.littleredbutton", Context.MODE_PRIVATE);
+//			  
+//			  String recipientNameSet =
+//			  "tr.edu.boun.swe599.littleredbutton.recipientName"; 
+//			  String recipientPhoneSet =
+//			  "tr.edu.boun.swe599.littleredbutton.recipientPhoneSet"; 
+//			  String recipientEmailSet =
+//			  "tr.edu.boun.swe599.littleredbutton.recipientEmailSet";
+//			  
+//			  nameSet = prefs.getStringSet(recipientNameSet, new HashSet<String>()); 
+//			  phoneSet = prefs.getStringSet(recipientPhoneSet, new HashSet<String>());
+//			  emailSet = prefs.getStringSet(recipientEmailSet, new HashSet<String>());
 			  
 			  final PictureCallback callback = new PictureCallback() {
 					@Override
@@ -202,7 +206,16 @@ public class MainActivity extends Activity implements LocationListener {
 		
 		Toast.makeText(this, "Starting to send notifications...",
 				Toast.LENGTH_SHORT).show();
+
+		recipientEmailList.clear();
+		recipientPhoneNumberList.clear();
 		
+		List<Recipient> recipientlist = db.getAllRecipient();
+        for (Recipient recipient : recipientlist) {
+        	recipientEmailList.add(recipient.getRecipientEmailAddress());
+        	recipientPhoneNumberList.add(recipient.getRecipientPhoneNumber());
+		}
+        
 		Session session = Session.getActiveSession();
 		boolean facebookInUse = (session != null && session.isOpened());
 		boolean twitterInUse = twitterSession.isTwitterLoggedInAlready();
@@ -223,12 +236,15 @@ public class MainActivity extends Activity implements LocationListener {
 		if (facebookInUse)
 			performPublish(PendingAction.POST_PHOTO,
 					canPresentShareDialogWithPhotos);
+		
 		if (twitterInUse) {
 			TwitterWorker tw = new TwitterWorker(MainActivity.this);
 			tw.sendTweet(getPostBody(), getPictureFileName());
 		}
+	
+		//new AsyncMailSender(MainActivity.this, getCoordinatesString(), getPictureFileName(), recipientEmailList).execute();
 		
-		new AsyncMailSender(MainActivity.this, getCoordinatesString(), getPictureFileName()).execute();
+		new AsyncSmsSender(MainActivity.this, getCoordinatesString(), recipientPhoneNumberList).execute();
 	}
 
 	private OnClickListener recipientsButtonListener = new OnClickListener() {
@@ -265,6 +281,11 @@ public class MainActivity extends Activity implements LocationListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		db = new MySQLLiteHelper(this);
+		
+		recipientEmailList = new ArrayList<String>();
+		recipientPhoneNumberList = new ArrayList<String>();
+		
 		// get shared preferences
 		SharedPreferences pref = PreferenceManager
 				.getDefaultSharedPreferences(getApplicationContext());
@@ -362,8 +383,8 @@ public class MainActivity extends Activity implements LocationListener {
 
 		getLocation();
 		if (location != null)
-			infoLabel.setText("Coordinates - Lat: "
-					+ String.valueOf(location.getLatitude()) + ", Lon: "
+			infoLabel.setText("Coordinates:\nLat: "
+					+ String.valueOf(location.getLatitude()) + "\nLon: "
 					+ String.valueOf(location.getLongitude()));
 	}
 
@@ -579,12 +600,12 @@ public class MainActivity extends Activity implements LocationListener {
 	public void onLocationChanged(Location location) {
 		this.location = location;
 		if (this.location != null)
-			infoLabel.setText("Coordinates - Lat: "
-					+ String.valueOf(this.location.getLatitude()) + ", Lon: "
-					+ String.valueOf(this.location.getLongitude()));
+			infoLabel.setText("Coordinates:\nLat: "
+					+ String.valueOf(location.getLatitude()) + "\nLon: "
+					+ String.valueOf(location.getLongitude()));
 		Toast.makeText(
 				this,
-				"Lat: " + String.valueOf(this.location.getLatitude()) + "Lon: "
+				"Lat: " + String.valueOf(this.location.getLatitude()) + " Lon: "
 						+ String.valueOf(this.location.getLatitude()),
 				Toast.LENGTH_LONG).show();
 	}

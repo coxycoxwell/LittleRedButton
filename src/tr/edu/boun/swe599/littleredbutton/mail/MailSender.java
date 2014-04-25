@@ -21,6 +21,7 @@ import javax.mail.internet.MimeMultipart;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class MailSender extends javax.mail.Authenticator {
 	private Context context;
@@ -67,7 +68,7 @@ public class MailSender extends javax.mail.Authenticator {
 	
 	public boolean send() throws Exception { 
 	    Properties props = _setProperties(); 
-	 
+	    
 	    if(!_user.equals("") && !_pass.equals("") && _to.length > 0 && !_from.equals("") && !_subject.equals("") && !_body.equals("")) { 
 	      Session session = Session.getInstance(props, this); 
 	 
