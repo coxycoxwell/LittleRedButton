@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/blankLabel"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="15dp"
         android:textAlignment="center"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
@@ -19,7 +19,7 @@
 	<TextView
         android:id="@+id/infoLabel"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:textAlignment="center"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
@@ -29,13 +29,29 @@
     <Button
         android:id="@+id/littleRedButton"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="120dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:background="@color/button_text"
         android:text="Get Help!"
         android:textColor="@android:color/white"
         android:textColorLink="@android:color/white" />
+    
+    <TextView
+        android:id="@+id/blank3Label"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:visibility="invisible"
+        android:textAlignment="center"
+        android:text="TextView" />
+    
+    <Button
+        android:id="@+id/mapsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Where am I?" />
     
     <TextView
         android:id="@+id/blank2Label"

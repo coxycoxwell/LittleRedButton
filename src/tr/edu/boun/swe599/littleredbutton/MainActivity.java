@@ -14,6 +14,7 @@ import java.util.Set;
 import tr.edu.boun.swe599.littleredbutton.facebook.FacebookLoginButton;
 import tr.edu.boun.swe599.littleredbutton.mail.AsyncMailSender;
 import tr.edu.boun.swe599.littleredbutton.mail.MailSender;
+import tr.edu.boun.swe599.littleredbutton.maps.ShowOnMapActivity;
 import tr.edu.boun.swe599.littleredbutton.recipients.MySQLLiteHelper;
 import tr.edu.boun.swe599.littleredbutton.recipients.Recipient;
 import tr.edu.boun.swe599.littleredbutton.recipients.RecipientActivity;
@@ -160,6 +161,7 @@ public class MainActivity extends Activity implements LocationListener {
 	};
 
 	private Button littleRedButton;
+	private Button mapsButton;
 	private Button recipientsButton;
 	private FacebookLoginButton fbLoginButton;
 	private Button loginTwitterButton;
@@ -255,6 +257,15 @@ public class MainActivity extends Activity implements LocationListener {
 			startActivity(intent);
 		}
 	};
+	
+	private OnClickListener mapsButtonListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(getApplicationContext(),
+					ShowOnMapActivity.class);
+			startActivity(intent);
+		}
+	};
 
 	private OnClickListener loginTwitterButtonListener = new OnClickListener() {
 		@Override
@@ -331,6 +342,9 @@ public class MainActivity extends Activity implements LocationListener {
 
 		littleRedButton = (Button) findViewById(R.id.littleRedButton);
 		littleRedButton.setOnClickListener(littleRedButtonListener);
+		
+		mapsButton = (Button) findViewById(R.id.mapsButton);
+		mapsButton.setOnClickListener(mapsButtonListener);
 
 		recipientsButton = (Button) findViewById(R.id.recipientsButton);
 		recipientsButton.setOnClickListener(recipientsButtonListener);
