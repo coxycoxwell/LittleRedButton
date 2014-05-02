@@ -89,12 +89,12 @@ public class MainActivity extends Activity implements LocationListener {
 	private List<String> recipientEmailList;
 	private List<String> recipientPhoneNumberList;
 
-//	private SharedPreferences prefs;
+	// private SharedPreferences prefs;
 	private MySQLLiteHelper db;
 
-//	private Set<String> nameSet;
-//	private Set<String> phoneSet;
-//	private Set<String> emailSet;
+	// private Set<String> nameSet;
+	// private Set<String> phoneSet;
+	// private Set<String> emailSet;
 
 	// flag for GPS status
 	boolean isGPSEnabled = false;
@@ -103,9 +103,9 @@ public class MainActivity extends Activity implements LocationListener {
 	// flag for location gets
 	boolean canGetLocation = false;
 
-	Location location = null; // location
-	double latitude; // latitude
-	double longitude; // longitude
+	// Location location = null; // location
+	// double latitude; // latitude
+	// double longitude; // longitude
 	// The minimum distance to change Updates in meters
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
 	// The minimum time between updates in milliseconds
@@ -122,7 +122,7 @@ public class MainActivity extends Activity implements LocationListener {
 	private boolean canPresentShareDialog;
 	private boolean canPresentShareDialogWithPhotos;
 
-//	private String messageToBeSent = "Deneme Mesajý!";
+	// private String messageToBeSent = "Deneme Mesajý!";
 
 	public static final int REQUEST_CODE = 100;
 	private static final int RESULT_SETTINGS = 152;
@@ -174,79 +174,96 @@ public class MainActivity extends Activity implements LocationListener {
 		@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 		@Override
 		public void onClick(View v) {
-//			 prefs = getApplicationContext().getSharedPreferences(
-//			 "tr.edu.boun.swe599.littleredbutton", Context.MODE_PRIVATE);
-//			  
-//			  String recipientNameSet =
-//			  "tr.edu.boun.swe599.littleredbutton.recipientName"; 
-//			  String recipientPhoneSet =
-//			  "tr.edu.boun.swe599.littleredbutton.recipientPhoneSet"; 
-//			  String recipientEmailSet =
-//			  "tr.edu.boun.swe599.littleredbutton.recipientEmailSet";
-//			  
-//			  nameSet = prefs.getStringSet(recipientNameSet, new HashSet<String>()); 
-//			  phoneSet = prefs.getStringSet(recipientPhoneSet, new HashSet<String>());
-//			  emailSet = prefs.getStringSet(recipientEmailSet, new HashSet<String>());
-			  
-			  final PictureCallback callback = new PictureCallback() {
-					@Override
-					public void onPictureTaken(byte[] data, Camera camera) {
-						try {
-							// async task for storing the photo
-							new SavePhotoTask(getApplicationContext(), data)
-									.execute();
-						} catch (Exception e) {
-							// some exceptionhandling
-						}
+			// prefs = getApplicationContext().getSharedPreferences(
+			// "tr.edu.boun.swe599.littleredbutton", Context.MODE_PRIVATE);
+			//
+			// String recipientNameSet =
+			// "tr.edu.boun.swe599.littleredbutton.recipientName";
+			// String recipientPhoneSet =
+			// "tr.edu.boun.swe599.littleredbutton.recipientPhoneSet";
+			// String recipientEmailSet =
+			// "tr.edu.boun.swe599.littleredbutton.recipientEmailSet";
+			//
+			// nameSet = prefs.getStringSet(recipientNameSet, new
+			// HashSet<String>());
+			// phoneSet = prefs.getStringSet(recipientPhoneSet, new
+			// HashSet<String>());
+			// emailSet = prefs.getStringSet(recipientEmailSet, new
+			// HashSet<String>());
+
+			final PictureCallback callback = new PictureCallback() {
+				@Override
+				public void onPictureTaken(byte[] data, Camera camera) {
+					try {
+						// async task for storing the photo
+						new SavePhotoTask(getApplicationContext(), data)
+								.execute();
+					} catch (Exception e) {
+						// some exceptionhandling
 					}
-				};
-				camera.takePicture(null, null, callback);
+				}
+			};
+			camera.takePicture(null, null, callback);
 		}
 	};
 
 	private void startNotifications() {
-		
+
 		Toast.makeText(this, "Starting to send notifications...",
 				Toast.LENGTH_SHORT).show();
 
 		recipientEmailList.clear();
 		recipientPhoneNumberList.clear();
-		
+
 		List<Recipient> recipientlist = db.getAllRecipient();
-        for (Recipient recipient : recipientlist) {
-        	recipientEmailList.add(recipient.getRecipientEmailAddress());
-        	recipientPhoneNumberList.add(recipient.getRecipientPhoneNumber());
+		for (Recipient recipient : recipientlist) {
+			recipientEmailList.add(recipient.getRecipientEmailAddress());
+			recipientPhoneNumberList.add(recipient.getRecipientPhoneNumber());
 		}
-        
+
 		Session session = Session.getActiveSession();
 		boolean facebookInUse = (session != null && session.isOpened());
 		boolean twitterInUse = twitterSession.isTwitterLoggedInAlready();
 
 		getLocation();
 
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-		String postBody = sharedPrefs.getString("pref_key_message_text", null);
-		if(postBody == null || postBody.equals("")) 
-			postBody = "Hi!\n";
-		else
-			postBody += "\n\nHi!\n";
-		postBody += "I need your help!\n";
-		postBody += "My current " + getCoordinatesString() + "\n";
-		postBody += "You may find, if it is available, a view of the scene in the attachment that I am currently at\n";
-
-		if (facebookInUse)
+		if (facebookInUse) {
+			Log.d("FB", "startnotifications");
 			performPublish(PendingAction.POST_PHOTO,
 					canPresentShareDialogWithPhotos);
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 		if (twitterInUse) {
 			TwitterWorker tw = new TwitterWorker(MainActivity.this);
 			tw.sendTweet(getPostBody(), getPictureFileName());
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-	
-		//new AsyncMailSender(MainActivity.this, getCoordinatesString(), getPictureFileName(), recipientEmailList).execute();
+
+		new AsyncMailSender(MainActivity.this, getCoordinatesString(),
+				getPictureFileName(), recipientEmailList).execute();
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		new AsyncSmsSender(MainActivity.this, getCoordinatesString(), recipientPhoneNumberList).execute();
+		new AsyncSmsSender(MainActivity.this, getCoordinatesString(),
+				recipientPhoneNumberList).execute();
 	}
 
 	private OnClickListener recipientsButtonListener = new OnClickListener() {
@@ -257,7 +274,7 @@ public class MainActivity extends Activity implements LocationListener {
 			startActivity(intent);
 		}
 	};
-	
+
 	private OnClickListener mapsButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -293,10 +310,10 @@ public class MainActivity extends Activity implements LocationListener {
 		super.onCreate(savedInstanceState);
 
 		db = new MySQLLiteHelper(this);
-		
+
 		recipientEmailList = new ArrayList<String>();
 		recipientPhoneNumberList = new ArrayList<String>();
-		
+
 		// get shared preferences
 		SharedPreferences pref = PreferenceManager
 				.getDefaultSharedPreferences(getApplicationContext());
@@ -311,7 +328,7 @@ public class MainActivity extends Activity implements LocationListener {
 			editor.putBoolean("firstTimeRun", false);
 			editor.commit();
 		}
-		
+
 		// do we have a camera?
 		if (!getPackageManager()
 				.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
@@ -342,7 +359,7 @@ public class MainActivity extends Activity implements LocationListener {
 
 		littleRedButton = (Button) findViewById(R.id.littleRedButton);
 		littleRedButton.setOnClickListener(littleRedButtonListener);
-		
+
 		mapsButton = (Button) findViewById(R.id.mapsButton);
 		mapsButton.setOnClickListener(mapsButtonListener);
 
@@ -373,6 +390,8 @@ public class MainActivity extends Activity implements LocationListener {
 		// FacebookDialog.canPresentShareDialog(this,
 		// FacebookDialog.ShareDialogFeature.PHOTOS);
 
+		twitterSession = new TwitterSession(this);
+
 		// Check if Internet present
 		if (!ConnectionDetector.isConnectingToInternet(this)) {
 			// Internet Connection is not present
@@ -393,13 +412,12 @@ public class MainActivity extends Activity implements LocationListener {
 			return;
 		}
 
-		twitterSession = new TwitterSession(this);
-
-		getLocation();
+		Location location = getLocation();
 		if (location != null)
 			infoLabel.setText("Coordinates:\nLat: "
 					+ String.valueOf(location.getLatitude()) + "\nLon: "
 					+ String.valueOf(location.getLongitude()));
+
 	}
 
 	@Override
@@ -515,6 +533,7 @@ public class MainActivity extends Activity implements LocationListener {
 	}
 
 	public Location getLocation() {
+		Location location = null;
 		try {
 			locationManager = (LocationManager) this
 					.getSystemService(LOCATION_SERVICE);
@@ -539,10 +558,10 @@ public class MainActivity extends Activity implements LocationListener {
 					if (locationManager != null) {
 						location = locationManager
 								.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-						if (location != null) {
-							latitude = location.getLatitude();
-							longitude = location.getLongitude();
-						}
+						// if (location != null) {
+						// latitude = location.getLatitude();
+						// longitude = location.getLongitude();
+						// }
 					}
 				}
 				// if GPS Enabled get lat/long using GPS Services
@@ -556,10 +575,10 @@ public class MainActivity extends Activity implements LocationListener {
 						if (locationManager != null) {
 							location = locationManager
 									.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-							if (location != null) {
-								latitude = location.getLatitude();
-								longitude = location.getLongitude();
-							}
+							// if (location != null) {
+							// latitude = location.getLatitude();
+							// longitude = location.getLongitude();
+							// }
 						}
 					}
 				}
@@ -612,15 +631,15 @@ public class MainActivity extends Activity implements LocationListener {
 
 	@Override
 	public void onLocationChanged(Location location) {
-		this.location = location;
-		if (this.location != null)
+		// this.location = location;
+		if (location != null)
 			infoLabel.setText("Coordinates:\nLat: "
 					+ String.valueOf(location.getLatitude()) + "\nLon: "
 					+ String.valueOf(location.getLongitude()));
 		Toast.makeText(
 				this,
-				"Lat: " + String.valueOf(this.location.getLatitude()) + " Lon: "
-						+ String.valueOf(this.location.getLatitude()),
+				"Lat: " + String.valueOf(location.getLatitude()) + " Lon: "
+						+ String.valueOf(location.getLatitude()),
 				Toast.LENGTH_LONG).show();
 	}
 
@@ -637,13 +656,12 @@ public class MainActivity extends Activity implements LocationListener {
 	}
 
 	public String getCoordinatesString() {
+		Location location = getLocation();
 		if (location != null)
-			return "coordinates: Latitude:" + location.getLatitude()
-					+ ", Longitude:" + location.getLongitude()
-					+ " http://maps.google.com/?q=" + location.getLatitude()
-					+ "," + location.getLongitude();
+			return "http://maps.google.com/?q=" + location.getLatitude() + ","
+					+ location.getLongitude();
 		else
-			return "";
+			return "Unkown!";
 	}
 
 	public void updateUI() {
@@ -655,6 +673,7 @@ public class MainActivity extends Activity implements LocationListener {
 
 	@SuppressWarnings("incomplete-switch")
 	private void handlePendingAction() {
+		Log.d("FB", "handlependingaction");
 		PendingAction previouslyPendingAction = pendingAction;
 		// These actions may re-set pendingAction if they are still pending, but
 		// we assume they
@@ -689,6 +708,7 @@ public class MainActivity extends Activity implements LocationListener {
 	 * .addPhotos(Arrays.asList(photos)); }
 	 */
 	private void postPhoto() {
+		Log.d("FB", "postphoto");
 		Bitmap image = BitmapFactory.decodeFile(getPictureFileName());
 		if (canPresentShareDialogWithPhotos) {
 			// FacebookDialog shareDialog =
@@ -708,27 +728,26 @@ public class MainActivity extends Activity implements LocationListener {
 					});
 
 			Bundle parameters = request.getParameters();
-						
+
 			parameters.putString("message", getPostBody());
 			request.setParameters(parameters);
 			request.executeAsync();
+			Log.d("FB", "executeasync");
 		} else {
 			pendingAction = PendingAction.POST_PHOTO;
 		}
 	}
-	
-	private String getPostBody()
-	{
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+	private String getPostBody() {
+		SharedPreferences sharedPrefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
 
 		String postBody = sharedPrefs.getString("pref_key_message_text", null);
-		if(postBody == null || postBody.equals("")) 
-			postBody = "Hi!\n";
+		if (postBody == null || postBody.equals(""))
+			postBody = "\n";
 		else
-			postBody += "\n\nHi!\n";
-		postBody += "I need your help!\n";
-		postBody += "My current " + getCoordinatesString() + "\n";
-		postBody += "You may find, if it is available, a view of the scene in the attachment that I am currently at\n";
+			postBody += "\n";
+		postBody += "I'm at " + getCoordinatesString();
 
 		return postBody;
 	}
@@ -740,14 +759,17 @@ public class MainActivity extends Activity implements LocationListener {
 	}
 
 	private void performPublish(PendingAction action, boolean allowNoSession) {
+		Log.d("FB", "performpublish");
 		Session session = Session.getActiveSession();
 		if (session != null) {
 			pendingAction = action;
 			if (hasPublishPermission()) {
 				// We can do the action right away.
+				Log.d("FB", "haspublishpermssion");
 				handlePendingAction();
 				return;
 			} else if (session.isOpened()) {
+				Log.d("FB", "requestnewpermission");
 				// We need to get new permissions, then complete the action when
 				// we get called back.
 				session.requestNewPublishPermissions(new Session.NewPermissionsRequest(
@@ -852,7 +874,7 @@ public class MainActivity extends Activity implements LocationListener {
 		protected void onPreExecute() {
 			super.onPreExecute();
 			pDialog = new ProgressDialog(MainActivity.this);
-			pDialog.setMessage("Retriving Access from Twitter...");
+			pDialog.setMessage("Loading Twitter...");
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(false);
 			pDialog.show();
@@ -911,7 +933,7 @@ public class MainActivity extends Activity implements LocationListener {
 
 			super.onPreExecute();
 			dialog = new ProgressDialog(MainActivity.this);
-			dialog.setMessage("Logging into Twitter...");
+			dialog.setMessage("Loading...");
 			dialog.show();
 		}
 
@@ -952,9 +974,10 @@ public class MainActivity extends Activity implements LocationListener {
 						"authenticationURL=>"
 								+ Uri.parse(requestToken.getAuthenticationURL()
 										.replace("http://", "https://")));
-				startActivity(new Intent(Intent.ACTION_VIEW,
+				Intent i = new Intent(Intent.ACTION_VIEW,
 						Uri.parse(requestToken.getAuthenticationURL().replace(
-								"http://", "https://"))));
+								"http://", "https://")));
+				startActivity(i);
 			}
 		}
 

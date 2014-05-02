@@ -72,8 +72,8 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 		else
 			mailBody += "\n\nHi!\n";
 		mailBody += mailFrom + " (Phone Number: " + mailPhoneNumber + ") may need your help!\n";
-		mailBody += "His/Her current " + coordinates + "\n";
-		mailBody += "You may find, if it is available, a view of the scene in the attachment that he/she is currently at\n";
+		mailBody += "At: " + coordinates + "\n";
+		mailBody += "You may find, if it is available, a view of the scene in the attachment that he/she is currently at.\n";
 		mailBody += "\nLittleRedButton Team";
 		m.set_body(mailBody); // email body
 		

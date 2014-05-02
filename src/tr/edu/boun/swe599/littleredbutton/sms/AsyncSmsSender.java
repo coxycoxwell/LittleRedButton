@@ -54,8 +54,7 @@ public class AsyncSmsSender extends AsyncTask<Void, Void, Boolean> {
 		else
 			smsBody += "\n\nHi!\n";
 		smsBody += memberName + " may need your help!\n";
-		smsBody += "I need your help!\n";
-		smsBody += "My current " + coordinates + "\n";
+		smsBody += "At: " + coordinates + "\n";
 		
 		try {
 			//return s.sendSMS(phoneSet.toArray(new String[phoneSet.size()]), smsBody);
