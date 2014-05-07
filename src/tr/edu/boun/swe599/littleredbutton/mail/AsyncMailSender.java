@@ -2,7 +2,6 @@ package tr.edu.boun.swe599.littleredbutton.mail;
 
 import java.util.List;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -13,7 +12,6 @@ import android.widget.Toast;
 
 public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 	Context context;
-	ProgressDialog dialog;
 	String coordinates;
 	String pictureFileName;
 	List <String> emailList;
@@ -28,24 +26,16 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		dialog = new ProgressDialog(context);
-		dialog.setMessage("Sending mail...");
-		dialog.show();
+		Toast.makeText(context,
+				"Sending e-mail", Toast.LENGTH_SHORT)
+				.show();
 	}
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
-		//Set<String> emailSet;
-		MailSender m = new MailSender(context);
+		MailSender m = new MailSender();
 
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-//		SharedPreferences prefs = context.getSharedPreferences(
-//				"tr.edu.boun.swe599.littleredbutton", Context.MODE_PRIVATE);
-//				  
-//		String recipientEmailSet = "tr.edu.boun.swe599.littleredbutton.recipientEmailSet";
-//				  
-//		emailSet = prefs.getStringSet(recipientEmailSet, new HashSet<String>());
-		
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);		
 		String mailUser = sharedPrefs.getString("pref_key_mail_user_name", null);
 		if(mailUser == null || mailUser.equals(""))
 			mailUser = "redlittlebutton@gmail.com";
@@ -77,7 +67,6 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 		mailBody += "\nLittleRedButton Team";
 		m.set_body(mailBody); // email body
 		
-		//m.setTo(emailSet.toArray(new String[emailSet.size()]));
 		m.setTo(emailList.toArray(new String[emailList.size()]));
 		
 		try {
@@ -97,19 +86,17 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
-		dialog.cancel();
 		if(result)
 			Toast.makeText(context,
-					"Email was sent successfully.", Toast.LENGTH_LONG)
+					"Email was sent successfully!", Toast.LENGTH_SHORT)
 					.show();
 		else
-			Toast.makeText(context, "Email was not sent.",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(context, "Email was not sent!",
+					Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	protected void onCancelled() {
 		super.onCancelled();
-		dialog.cancel();
 	}
 }

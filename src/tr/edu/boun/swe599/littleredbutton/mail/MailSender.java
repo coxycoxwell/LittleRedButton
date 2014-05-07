@@ -18,13 +18,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.util.Log;
-
 public class MailSender extends javax.mail.Authenticator {
-	private Context context;
 	private String _user;
 	private String _pass;
 
@@ -45,8 +39,7 @@ public class MailSender extends javax.mail.Authenticator {
 
 	private Multipart _multipart;
 
-	public MailSender(Context context) {
-		this.context = context;
+	public MailSender() {
 		_host = "smtp.gmail.com"; // default smtp server
 		_port = "465"; // default smtp port
 		_sport = "465"; // default socketfactory port
@@ -74,7 +67,6 @@ public class MailSender extends javax.mail.Authenticator {
 	 
 	      MimeMessage msg = new MimeMessage(session); 
 	 
-	      //msg.setFrom(new InternetAddress(_from)); 
 	      msg.setFrom(new InternetAddress(_user, _from));
 	       
 	      InternetAddress[] addressTo = new InternetAddress[_to.length]; 

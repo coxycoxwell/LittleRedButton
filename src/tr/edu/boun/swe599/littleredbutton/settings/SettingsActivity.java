@@ -18,8 +18,6 @@ public class SettingsActivity extends PreferenceActivity {
 	@SuppressWarnings({ "deprecation" })
 	private void setupSimplePreferencesScreen() {
 		addPreferencesFromResource(R.xml.preferences);
-		//bindPreferenceSummaryToValue(findPreference("pref_key_message_text"));
-		//bindPreferenceSummaryToValue(findPreference("pref_key_username"));
 		bindPreferenceSummaryToValue(findPreference("pref_key_mail_user_name"));
 	}
 

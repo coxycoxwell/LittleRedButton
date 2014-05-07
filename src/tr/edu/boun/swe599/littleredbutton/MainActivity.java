@@ -7,13 +7,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import tr.edu.boun.swe599.littleredbutton.facebook.FacebookLoginButton;
 import tr.edu.boun.swe599.littleredbutton.mail.AsyncMailSender;
-import tr.edu.boun.swe599.littleredbutton.mail.MailSender;
 import tr.edu.boun.swe599.littleredbutton.maps.ShowOnMapActivity;
 import tr.edu.boun.swe599.littleredbutton.recipients.MySQLLiteHelper;
 import tr.edu.boun.swe599.littleredbutton.recipients.Recipient;
@@ -54,7 +51,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -84,49 +80,39 @@ public class MainActivity extends Activity implements LocationListener {
 
 	private static final List<String> PERMISSIONS = Arrays
 			.asList("publish_actions");
-	private boolean pendingPublishReauthorization = false;
-
 	private List<String> recipientEmailList;
 	private List<String> recipientPhoneNumberList;
-
-	// private SharedPreferences prefs;
+	private List<GraphUser> tags;
+	
+	// flag for GPS status
+	private boolean isGPSEnabled = false;
+	// flag for network status
+	private	boolean isNetworkEnabled = false;
+	// flag for location gets
+	private	boolean canGetLocation = false;
+	private boolean pendingPublishReauthorization = false;
+	private boolean canPresentShareDialog;
+	
 	private MySQLLiteHelper db;
 
-	// private Set<String> nameSet;
-	// private Set<String> phoneSet;
-	// private Set<String> emailSet;
-
-	// flag for GPS status
-	boolean isGPSEnabled = false;
-	// flag for network status
-	boolean isNetworkEnabled = false;
-	// flag for location gets
-	boolean canGetLocation = false;
-
-	// Location location = null; // location
-	// double latitude; // latitude
-	// double longitude; // longitude
 	// The minimum distance to change Updates in meters
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
 	// The minimum time between updates in milliseconds
 	private static final long MIN_TIME_BW_UPDATES = 1000 * 50 * 1; // 50 seconds
 	// Declaring a Location Manager
+	public static final int REQUEST_CODE = 100;
+	private static final int RESULT_SETTINGS = 152;
+	private static final String PERMISSION = "publish_actions";
+	private final String PENDING_ACTION_BUNDLE_KEY = "com.facebook.samples.hellofacebook:PendingAction";
+	private String pictureFileName;
+	
 	protected LocationManager locationManager;
 
 	private GraphUser user;
-	private static final String PERMISSION = "publish_actions";
-	private final String PENDING_ACTION_BUNDLE_KEY = "com.facebook.samples.hellofacebook:PendingAction";
+	
 	private PendingAction pendingAction = PendingAction.NONE;
 	private GraphPlace place;
-	private List<GraphUser> tags;
-	private boolean canPresentShareDialog;
-	private boolean canPresentShareDialogWithPhotos;
-
-	// private String messageToBeSent = "Deneme Mesajý!";
-
-	public static final int REQUEST_CODE = 100;
-	private static final int RESULT_SETTINGS = 152;
-
+	
 	private Twitter twitter;
 	private RequestToken requestToken;
 	private TwitterSession twitterSession;
@@ -138,6 +124,7 @@ public class MainActivity extends Activity implements LocationListener {
 	}
 
 	private UiLifecycleHelper uiHelper;
+	
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 		@Override
 		public void call(Session session, SessionState state,
@@ -150,13 +137,13 @@ public class MainActivity extends Activity implements LocationListener {
 		@Override
 		public void onError(FacebookDialog.PendingCall pendingCall,
 				Exception error, Bundle data) {
-			Log.d("HelloFacebook", String.format("Error: %s", error.toString()));
+			Log.d("FacebookDialogCallback", String.format("Error: %s", error.toString()));
 		}
 
 		@Override
 		public void onComplete(FacebookDialog.PendingCall pendingCall,
 				Bundle data) {
-			Log.d("HelloFacebook", "Success!");
+			Log.d("FacebookDialogCallback", "Success!");
 		}
 	};
 
@@ -168,44 +155,52 @@ public class MainActivity extends Activity implements LocationListener {
 	private TextView infoLabel;
 
 	private Camera camera;
-	private String pictureFileName;
-
+	
+	final PictureCallback pcallback = new PictureCallback() {
+		@Override
+		public void onPictureTaken(byte[] data, Camera camera) {
+			try {
+				// async task for storing the photo
+				new SavePhotoTask(getApplicationContext(), data)
+						.execute();
+			} catch (Exception e) {
+				// some exceptionhandling
+			}
+		}
+	};	
+	
 	private OnClickListener littleRedButtonListener = new OnClickListener() {
 		@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 		@Override
 		public void onClick(View v) {
-			// prefs = getApplicationContext().getSharedPreferences(
-			// "tr.edu.boun.swe599.littleredbutton", Context.MODE_PRIVATE);
-			//
-			// String recipientNameSet =
-			// "tr.edu.boun.swe599.littleredbutton.recipientName";
-			// String recipientPhoneSet =
-			// "tr.edu.boun.swe599.littleredbutton.recipientPhoneSet";
-			// String recipientEmailSet =
-			// "tr.edu.boun.swe599.littleredbutton.recipientEmailSet";
-			//
-			// nameSet = prefs.getStringSet(recipientNameSet, new
-			// HashSet<String>());
-			// phoneSet = prefs.getStringSet(recipientPhoneSet, new
-			// HashSet<String>());
-			// emailSet = prefs.getStringSet(recipientEmailSet, new
-			// HashSet<String>());
-
-			final PictureCallback callback = new PictureCallback() {
-				@Override
-				public void onPictureTaken(byte[] data, Camera camera) {
-					try {
-						// async task for storing the photo
-						new SavePhotoTask(getApplicationContext(), data)
-								.execute();
-					} catch (Exception e) {
-						// some exceptionhandling
-					}
-				}
-			};
-			camera.takePicture(null, null, callback);
+			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+			boolean trackMe = sharedPrefs.getBoolean("pref_key_track_me", false);
+			
+			if(trackMe) {
+				Thread t = new Thread(new Runnable() {
+					@Override
+	                public void run() {
+	                    trackHim();
+	                }	
+				});
+				t.start();
+			}
+			else
+				camera.takePicture(null, null, pcallback);
 		}
 	};
+	
+	private void trackHim()
+	{
+		do {
+			camera.takePicture(null, null, pcallback);
+			try {
+				Thread.sleep(60000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} while (true);
+	}
 
 	private void startNotifications() {
 
@@ -225,17 +220,12 @@ public class MainActivity extends Activity implements LocationListener {
 		boolean facebookInUse = (session != null && session.isOpened());
 		boolean twitterInUse = twitterSession.isTwitterLoggedInAlready();
 
-		getLocation();
-
 		if (facebookInUse) {
 			Log.d("FB", "startnotifications");
-			performPublish(PendingAction.POST_PHOTO,
-					canPresentShareDialogWithPhotos);
-			
+			performPublish(PendingAction.POST_PHOTO, false);
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -247,7 +237,6 @@ public class MainActivity extends Activity implements LocationListener {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -258,7 +247,6 @@ public class MainActivity extends Activity implements LocationListener {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -385,11 +373,7 @@ public class MainActivity extends Activity implements LocationListener {
 		// Can we present the share dialog for regular links?
 		canPresentShareDialog = FacebookDialog.canPresentShareDialog(this,
 				FacebookDialog.ShareDialogFeature.SHARE_DIALOG);
-		// Can we present the share dialog for photos?
-		canPresentShareDialogWithPhotos = false;
-		// FacebookDialog.canPresentShareDialog(this,
-		// FacebookDialog.ShareDialogFeature.PHOTOS);
-
+		
 		twitterSession = new TwitterSession(this);
 
 		// Check if Internet present
@@ -398,7 +382,6 @@ public class MainActivity extends Activity implements LocationListener {
 			Toast.makeText(MainActivity.this,
 					"Please check your Internet connection!", Toast.LENGTH_LONG)
 					.show();
-			// stop executing code by return
 			return;
 		}
 
@@ -417,7 +400,6 @@ public class MainActivity extends Activity implements LocationListener {
 			infoLabel.setText("Coordinates:\nLat: "
 					+ String.valueOf(location.getLatitude()) + "\nLon: "
 					+ String.valueOf(location.getLongitude()));
-
 	}
 
 	@Override
@@ -458,7 +440,7 @@ public class MainActivity extends Activity implements LocationListener {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-
+		Log.d("Main Activity", "onActivityResult=>");
 		if (requestCode == RESULT_SETTINGS)
 			return;
 
@@ -558,10 +540,6 @@ public class MainActivity extends Activity implements LocationListener {
 					if (locationManager != null) {
 						location = locationManager
 								.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-						// if (location != null) {
-						// latitude = location.getLatitude();
-						// longitude = location.getLongitude();
-						// }
 					}
 				}
 				// if GPS Enabled get lat/long using GPS Services
@@ -575,10 +553,6 @@ public class MainActivity extends Activity implements LocationListener {
 						if (locationManager != null) {
 							location = locationManager
 									.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-							// if (location != null) {
-							// latitude = location.getLatitude();
-							// longitude = location.getLongitude();
-							// }
 						}
 					}
 				}
@@ -631,7 +605,6 @@ public class MainActivity extends Activity implements LocationListener {
 
 	@Override
 	public void onLocationChanged(Location location) {
-		// this.location = location;
 		if (location != null)
 			infoLabel.setText("Coordinates:\nLat: "
 					+ String.valueOf(location.getLatitude()) + "\nLon: "
@@ -640,7 +613,7 @@ public class MainActivity extends Activity implements LocationListener {
 				this,
 				"Lat: " + String.valueOf(location.getLatitude()) + " Lon: "
 						+ String.valueOf(location.getLatitude()),
-				Toast.LENGTH_LONG).show();
+				Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
@@ -687,10 +660,6 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	}
 
-	private interface GraphObjectWithId extends GraphObject {
-		String getId();
-	}
-
 	private void showPublishResult(String message, GraphObject result,
 			FacebookRequestError error) {
 		if (error == null)
@@ -701,20 +670,10 @@ public class MainActivity extends Activity implements LocationListener {
 					.show();
 	}
 
-	/*
-	 * private FacebookDialog.PhotoShareDialogBuilder
-	 * createShareDialogBuilderForPhoto( Bitmap... photos) { return new
-	 * FacebookDialog.PhotoShareDialogBuilder(this)
-	 * .addPhotos(Arrays.asList(photos)); }
-	 */
 	private void postPhoto() {
 		Log.d("FB", "postphoto");
 		Bitmap image = BitmapFactory.decodeFile(getPictureFileName());
-		if (canPresentShareDialogWithPhotos) {
-			// FacebookDialog shareDialog =
-			// createShareDialogBuilderForPhoto(image).build();
-			// uiHelper.trackPendingDialogCall(shareDialog.present());
-		} else if (hasPublishPermission()) {
+		if (hasPublishPermission()) {
 			Request request = null;
 
 			request = Request.newUploadPhotoRequest(Session.getActiveSession(),
@@ -731,6 +690,9 @@ public class MainActivity extends Activity implements LocationListener {
 
 			parameters.putString("message", getPostBody());
 			request.setParameters(parameters);
+			Toast.makeText(MainActivity.this,
+					"Posting to Facebook", Toast.LENGTH_SHORT)
+					.show();
 			request.executeAsync();
 			Log.d("FB", "executeasync");
 		} else {
@@ -841,7 +803,6 @@ public class MainActivity extends Activity implements LocationListener {
 					+ photoFile);
 
 			try {
-				// I guess you know how to save a file
 				File pictureFile = new File(getPictureFileName());
 
 				try {
@@ -849,14 +810,12 @@ public class MainActivity extends Activity implements LocationListener {
 					fos.write(data);
 					fos.close();
 					Toast.makeText(this.ctx, "Picture has been taken!",
-							Toast.LENGTH_LONG).show();
+							Toast.LENGTH_SHORT).show();
 				} catch (Exception error) {
 					Toast.makeText(this.ctx, "Image could not be saved.",
 							Toast.LENGTH_LONG).show();
 				}
-			} catch (final Exception e) {
-				// capture flying shit
-			}
+			} catch (final Exception e) {}
 		}
 
 		private File getDir() {
@@ -933,7 +892,7 @@ public class MainActivity extends Activity implements LocationListener {
 
 			super.onPreExecute();
 			dialog = new ProgressDialog(MainActivity.this);
-			dialog.setMessage("Loading...");
+			dialog.setMessage("Loading Twitter Login...");
 			dialog.show();
 		}
 

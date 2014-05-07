@@ -8,14 +8,12 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.conf.ConfigurationBuilder;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import tr.edu.boun.swe599.littleredbutton.R;
 import tr.edu.boun.swe599.littleredbutton.twitter.ConnectionDetector;
 import tr.edu.boun.swe599.littleredbutton.twitter.Constants;
 
@@ -44,19 +42,15 @@ public class TwitterWorker {
 	}
 
 	class UpdateTwitterStatusTask extends AsyncTask<String, String, Boolean> {
-		ProgressDialog pDialog;
-
 		/**
 		 * Before starting background thread Show Progress Dialog
 		 * */
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(context);
-			pDialog.setMessage("Notifiying Twitter...");
-			pDialog.setIndeterminate(false);
-			pDialog.setCancelable(false);
-			pDialog.show();
+			Toast.makeText(context,
+					"Sending tweet", Toast.LENGTH_SHORT)
+					.show();
 		}
 
 		/**
@@ -106,7 +100,6 @@ public class TwitterWorker {
 			// dismiss the dialog after getting all products
 			// TODO Auto-generated method stub
 			mStatusTask = null;
-			pDialog.cancel();
 			if (results) {
 				Toast.makeText(context, "Tweeted successfully!",
 						Toast.LENGTH_SHORT).show();
@@ -118,8 +111,6 @@ public class TwitterWorker {
 		protected void onCancelled() {
 			super.onCancelled();
 			mStatusTask = null;
-			pDialog.cancel();
 		}
 	}
 }
-

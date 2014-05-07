@@ -18,7 +18,7 @@
 	<string name="pref_title_username">Display Name</string> 
 
 	<string name="pref_title_mail_settings">Mail Settings</string>
-	<string name="pref_summary_mail_settings">Only Gmail accounts can be used</string>
+	<string name="pref_summary_mail_settings">Only Gmail accounts can be used (Default app settings will be used if left empty)</string>
 	<string name="pref_title_mail_user_name">User Name</string>
 	<string name="pref_summary_mail_user_name"></string>
 	<string name="pref_title_mail_password">Password</string>
