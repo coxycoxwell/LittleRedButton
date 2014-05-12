@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -42,7 +43,7 @@ public class RecipientActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			Intent intent = new Intent(RecipientActivity.this,
-					AddRecipientActivity.class);
+					AllContactsActivity.class);
 			startActivity(intent);
 		}
 	};
@@ -89,10 +90,12 @@ public class RecipientActivity extends Activity {
 	        final TextView text = new TextView(this);
 	        text.setText(name);
 	        text.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
+	        text.setPadding(20, 0, 10, 0);
 
 	        final Button button = new Button(this);
-	        button.setText("Delete");
+	        button.setText("    Delete    ");
 	        button.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
+	        button.setPadding(10, 0, 0, 0);
 	        button.setOnClickListener(new View.OnClickListener() {
 	            @Override
 	            public void onClick(View v) {

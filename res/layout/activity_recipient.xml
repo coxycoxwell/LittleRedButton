@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="OK" />
+        android:text="   OK   " />
 
     <ScrollView
         android:id="@+id/scrollView1"
@@ -33,7 +33,7 @@
                 android:layout_above="@+id/mainButton"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true" >
+                android:layout_alignParentTop="true">
 
             </TableLayout>
         </LinearLayout>
@@ -47,7 +47,7 @@
         android:layout_alignBaseline="@+id/mainButton"
         android:layout_alignBottom="@+id/mainButton"
         android:layout_alignParentLeft="true"
-        android:text="Show All Contacts" />
+        android:text="Explore Contacts" />
 
     <Button
         android:id="@+id/addRecipientButton"

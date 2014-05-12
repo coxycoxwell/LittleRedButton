@@ -33,6 +33,9 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
+		if(emailList.size() == 0)
+			return false;
+		
 		MailSender m = new MailSender();
 
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);		
@@ -47,9 +50,6 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 		m.set_pass(mailPassword);
 		
 		String mailFrom = sharedPrefs.getString("pref_key_username", null);
-		TelephonyManager tMgr = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-		String mailPhoneNumber = tMgr.getLine1Number();
-		
 		if(mailFrom == null || mailFrom.equals(""))
 			mailFrom = "Little Red Button Member";
 		m.set_from(mailFrom);
@@ -61,7 +61,7 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 			mailBody = "Hi!\n";
 		else
 			mailBody += "\n\nHi!\n";
-		mailBody += mailFrom + " (Phone Number: " + mailPhoneNumber + ") may need your help!\n";
+		mailBody += mailFrom + " may need your help!\n";
 		mailBody += "At: " + coordinates + "\n";
 		mailBody += "You may find, if it is available, a view of the scene in the attachment that he/she is currently at.\n";
 		mailBody += "\nLittleRedButton Team";
@@ -88,11 +88,17 @@ public class AsyncMailSender extends AsyncTask<Void, Void, Boolean> {
 		super.onPostExecute(result);
 		if(result)
 			Toast.makeText(context,
-					"Email was sent successfully!", Toast.LENGTH_SHORT)
+					"e-mail was sent successfully!", Toast.LENGTH_SHORT)
 					.show();
-		else
-			Toast.makeText(context, "Email was not sent!",
-					Toast.LENGTH_SHORT).show();
+		else {
+			if(emailList.size() == 0)
+				Toast.makeText(context,
+						"No e-mail recipients!", Toast.LENGTH_SHORT)
+						.show();
+			else
+				Toast.makeText(context, "e-mail was not sent!",
+						Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override

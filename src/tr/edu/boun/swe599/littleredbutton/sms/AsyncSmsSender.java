@@ -30,6 +30,9 @@ public class AsyncSmsSender extends AsyncTask<Void, Void, Boolean> {
 	
 	@Override
 	protected Boolean doInBackground(Void... params) {
+		if(phoneNumberList.size() == 0)
+			return false;
+		
 		SmsSender s = new SmsSender();
 
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -38,7 +41,7 @@ public class AsyncSmsSender extends AsyncTask<Void, Void, Boolean> {
 		if(smsBody == null || smsBody.equals("")) 
 			smsBody = "Hi!\n";
 		else
-			smsBody += "\n\nHi!\n";
+			smsBody += "\n";
 		smsBody += "I need your help!\n";
 		smsBody += "At: " + coordinates + "\n";
 		
@@ -57,9 +60,15 @@ public class AsyncSmsSender extends AsyncTask<Void, Void, Boolean> {
 			Toast.makeText(context,
 					"SMS was sent successfully!", Toast.LENGTH_SHORT)
 					.show();
-		else
-			Toast.makeText(context, "SMS was not sent!",
-					Toast.LENGTH_SHORT).show();
+		else {
+			if(phoneNumberList.size() == 0)
+				Toast.makeText(context,
+						"No SMS recipients!", Toast.LENGTH_SHORT)
+						.show();
+			else
+				Toast.makeText(context, "SMS was not sent!",
+						Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override

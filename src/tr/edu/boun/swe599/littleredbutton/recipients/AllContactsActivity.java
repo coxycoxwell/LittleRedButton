@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.widget.TextView;
 
-public class AddRecipientActivity extends Activity {
+public class AllContactsActivity extends Activity {
 
 	public TextView outputText;
 

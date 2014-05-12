@@ -1719,28 +1719,27 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f080013;
-        public static final int facebookApplicationId=0x7f080048;
+        public static final int facebookApplicationId=0x7f080047;
         public static final int hello_world=0x7f080042;
         /**  Location client code resources (prefix with location_client) 
          */
         public static final int location_client_powered_by_google=0x7f08001a;
-        public static final int pref_summary_mail_password=0x7f080055;
-        public static final int pref_summary_mail_settings=0x7f080051;
-        public static final int pref_summary_mail_user_name=0x7f080053;
-        public static final int pref_summary_message_text=0x7f08004a;
-        public static final int pref_summary_track_me=0x7f08004c;
-        public static final int pref_summary_username=0x7f08004e;
-        public static final int pref_title_mail_password=0x7f080054;
-        public static final int pref_title_mail_settings=0x7f080050;
-        public static final int pref_title_mail_user_name=0x7f080052;
-        public static final int pref_title_message_text=0x7f08004b;
-        public static final int pref_title_track_me=0x7f08004d;
-        public static final int pref_title_username=0x7f08004f;
+        public static final int pref_summary_mail_password=0x7f080054;
+        public static final int pref_summary_mail_settings=0x7f080050;
+        public static final int pref_summary_mail_user_name=0x7f080052;
+        public static final int pref_summary_message_text=0x7f080049;
+        public static final int pref_summary_track_me=0x7f08004b;
+        public static final int pref_summary_username=0x7f08004d;
+        public static final int pref_title_mail_password=0x7f080053;
+        public static final int pref_title_mail_settings=0x7f08004f;
+        public static final int pref_title_mail_user_name=0x7f080051;
+        public static final int pref_title_message_text=0x7f08004a;
+        public static final int pref_title_track_me=0x7f08004c;
+        public static final int pref_title_username=0x7f08004e;
         public static final int title_activity_add_recipient=0x7f080045;
-        public static final int title_activity_contact=0x7f080046;
-        public static final int title_activity_maps=0x7f080047;
+        public static final int title_activity_maps=0x7f080046;
         public static final int title_activity_recipient=0x7f080044;
-        public static final int title_activity_settings=0x7f080049;
+        public static final int title_activity_settings=0x7f080048;
     }
     public static final class style {
         /** 

@@ -663,7 +663,7 @@ public class MainActivity extends Activity implements LocationListener {
 	private void showPublishResult(String message, GraphObject result,
 			FacebookRequestError error) {
 		if (error == null)
-			Toast.makeText(this, "Post to Facebook success!",
+			Toast.makeText(this, "Posted to Facebook successfully!",
 					Toast.LENGTH_SHORT).show();
 		else
 			Toast.makeText(this, error.getErrorMessage(), Toast.LENGTH_LONG)
