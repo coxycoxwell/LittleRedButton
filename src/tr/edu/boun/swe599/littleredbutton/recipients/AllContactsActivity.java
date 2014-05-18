@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.recipients;
 
 import tr.edu.boun.swe599.littleredbutton.R;
@@ -10,7 +21,7 @@ import android.provider.ContactsContract;
 import android.widget.TextView;
 
 public class AllContactsActivity extends Activity {
-
+	// Displays the name, phone number and e-mail addresses of recipients selected by the user
 	public TextView outputText;
 
 	@Override

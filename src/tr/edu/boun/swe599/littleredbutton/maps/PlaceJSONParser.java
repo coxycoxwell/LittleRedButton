@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.maps;
 
 import java.util.ArrayList;
@@ -10,6 +21,7 @@ import org.json.JSONObject;
 
 public class PlaceJSONParser {
     
+	/** Extracts the message returned by Google Maps as JSON object */
     /** Receives a JSONObject and returns a list */
     public List<HashMap<String,String>> parse(JSONObject jObject){        
         JSONArray jPlaces = null;

@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.sms;
 
 import java.util.List;
@@ -13,7 +24,8 @@ public class AsyncSmsSender extends AsyncTask<Void, Void, Boolean> {
 	Context context;
 	String coordinates;
 	List <String> phoneNumberList;
-	
+
+	// Used to send SMS message to a phoneNumberList with the given coordinates
 	public AsyncSmsSender (Context context, String coordinates, List<String> phoneNumbers) {
 		this.context = context;
 		this.coordinates = coordinates;
@@ -30,13 +42,14 @@ public class AsyncSmsSender extends AsyncTask<Void, Void, Boolean> {
 	
 	@Override
 	protected Boolean doInBackground(Void... params) {
+		// if no phoneNumbers to send abort
 		if(phoneNumberList.size() == 0)
 			return false;
 		
 		SmsSender s = new SmsSender();
 
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-		
+		// construct SMS body
 		String smsBody = sharedPrefs.getString("pref_key_message_text", null);
 		if(smsBody == null || smsBody.equals("")) 
 			smsBody = "Hi!\n";
@@ -44,7 +57,7 @@ public class AsyncSmsSender extends AsyncTask<Void, Void, Boolean> {
 			smsBody += "\n";
 		smsBody += "I need your help!\n";
 		smsBody += "At: " + coordinates + "\n";
-		
+		// send SMSs
 		try {
 			return s.sendSMS(phoneNumberList.toArray(new String[phoneNumberList.size()]), smsBody);
 		} catch (Exception e) {

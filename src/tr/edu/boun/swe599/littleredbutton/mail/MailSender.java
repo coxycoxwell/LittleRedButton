@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.mail;
 
 import java.util.Date;
@@ -39,6 +50,7 @@ public class MailSender extends javax.mail.Authenticator {
 
 	private Multipart _multipart;
 
+	// The real e-mail sender behind the scenes which performs necessary network operations
 	public MailSender() {
 		_host = "smtp.gmail.com"; // default smtp server
 		_port = "465"; // default smtp port

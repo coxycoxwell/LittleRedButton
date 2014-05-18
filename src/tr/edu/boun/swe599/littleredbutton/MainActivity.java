@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton;
 
 import java.io.File;
@@ -78,53 +89,67 @@ import com.facebook.widget.FacebookDialog;
 
 public class MainActivity extends Activity implements LocationListener {
 
+	// Facebook permissions - 
+	// default set to publish_actions in order to let the application 
+	// send facebook posts without user intervention
 	private static final List<String> PERMISSIONS = Arrays
 			.asList("publish_actions");
+	// List of e-mail addresses that the recipients have
 	private List<String> recipientEmailList;
+	// List of phone numbers that the recipients have
 	private List<String> recipientPhoneNumberList;
-	private List<GraphUser> tags;
 	
 	// flag for GPS status
 	private boolean isGPSEnabled = false;
 	// flag for network status
 	private	boolean isNetworkEnabled = false;
 	// flag for location gets
-	private	boolean canGetLocation = false;
-	private boolean pendingPublishReauthorization = false;
-	private boolean canPresentShareDialog;
+	private	boolean canGetLocation = false; 
 	
+	// sqlite db to keep the recipients and their properties
 	private MySQLLiteHelper db;
 
 	// The minimum distance to change Updates in meters
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
 	// The minimum time between updates in milliseconds
 	private static final long MIN_TIME_BW_UPDATES = 1000 * 50 * 1; // 50 seconds
-	// Declaring a Location Manager
+	// Int codes are used to handle onActivityResult events properly
 	public static final int REQUEST_CODE = 100;
 	private static final int RESULT_SETTINGS = 152;
+	// Default facebook permission to publish current location
 	private static final String PERMISSION = "publish_actions";
+	// Pending action indicator is needed for Facebook SDK limitations
 	private final String PENDING_ACTION_BUNDLE_KEY = "com.facebook.samples.hellofacebook:PendingAction";
+	// The name of the file that the picture data has been written
 	private String pictureFileName;
 	
+	// Used to get user's current GPS location
 	protected LocationManager locationManager;
 
-	private GraphUser user;
-	
+	// Pending action indicator is needed for Facebook SDK limitations
+	// Facebook API variables
 	private PendingAction pendingAction = PendingAction.NONE;
 	private GraphPlace place;
-	
+	private GraphUser user;
+	private List<GraphUser> tags;
+	private boolean pendingPublishReauthorization = false;
+	private boolean canPresentShareDialog;
+		
+	// Twitter API variables
 	private Twitter twitter;
 	private RequestToken requestToken;
 	private TwitterSession twitterSession;
 	private AuthenticationTask mAuthTask;
 	private RetriveAcessTokenTask mAccessTokenTask;
 
+	// Pending action enums for Facebook SDK
 	private enum PendingAction {
 		NONE, POST_PHOTO
 	}
 
 	private UiLifecycleHelper uiHelper;
 	
+	// Facebook Callback object - called when Facebook session state is changed
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 		@Override
 		public void call(Session session, SessionState state,
@@ -133,6 +158,7 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	};
 
+	// Facebook Callback object - called when the user reacts to Facebook Dialog object
 	private FacebookDialog.Callback dialogCallback = new FacebookDialog.Callback() {
 		@Override
 		public void onError(FacebookDialog.PendingCall pendingCall,
@@ -147,35 +173,43 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	};
 
+	// "Get Help" button
 	private Button littleRedButton;
+	// "Where am I?" button
 	private Button mapsButton;
+	// "Organize e-mail & SMS Recipients" button
 	private Button recipientsButton;
+	// "Enable/Disable Facebook" button
 	private FacebookLoginButton fbLoginButton;
+	// "Enable/Disable Twitter" button
 	private Button loginTwitterButton;
+	// Label that displays the current GPS location coordinates
 	private TextView infoLabel;
-
+	// Camera object to shoot photo
 	private Camera camera;
-	
+	// Camera callback object - called when the camera shoots the picture
 	final PictureCallback pcallback = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
 			try {
-				// async task for storing the photo
+				// async task for storing the photo data to sdcard
 				new SavePhotoTask(getApplicationContext(), data)
 						.execute();
 			} catch (Exception e) {
-				// some exceptionhandling
 			}
 		}
 	};	
 	
+	// Called when the user hits "Get Help" button
 	private OnClickListener littleRedButtonListener = new OnClickListener() {
 		@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 		@Override
 		public void onClick(View v) {
+			// Get sharedpreferences to determine whether the user selected "Track Me" option or not
 			SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 			boolean trackMe = sharedPrefs.getBoolean("pref_key_track_me", false);
 			
+			// if user selected tracking option track him in a seperate thread
 			if(trackMe) {
 				Thread t = new Thread(new Runnable() {
 					@Override
@@ -185,6 +219,7 @@ public class MainActivity extends Activity implements LocationListener {
 				});
 				t.start();
 			}
+			// Take picture and start sequence for only once
 			else
 				camera.takePicture(null, null, pcallback);
 		}
@@ -192,6 +227,7 @@ public class MainActivity extends Activity implements LocationListener {
 	
 	private void trackHim()
 	{
+		// start sequence every 60 seconds
 		do {
 			camera.takePicture(null, null, pcallback);
 			try {
@@ -202,11 +238,13 @@ public class MainActivity extends Activity implements LocationListener {
 		} while (true);
 	}
 
+	// Starts the sending sequence of the application
 	private void startNotifications() {
 
 		Toast.makeText(this, "Starting to send notifications...",
 				Toast.LENGTH_SHORT).show();
 
+		// clear and fill recipients' lists
 		recipientEmailList.clear();
 		recipientPhoneNumberList.clear();
 
@@ -216,10 +254,12 @@ public class MainActivity extends Activity implements LocationListener {
 			recipientPhoneNumberList.add(recipient.getRecipientPhoneNumber());
 		}
 
+		// control whether facebook and twitter are in use
 		Session session = Session.getActiveSession();
 		boolean facebookInUse = (session != null && session.isOpened());
 		boolean twitterInUse = twitterSession.isTwitterLoggedInAlready();
 
+		// if facebook in use publish photo
 		if (facebookInUse) {
 			Log.d("FB", "startnotifications");
 			performPublish(PendingAction.POST_PHOTO, false);
@@ -230,6 +270,7 @@ public class MainActivity extends Activity implements LocationListener {
 			}
 		}
 		
+		// if twitter in use send tweet
 		if (twitterInUse) {
 			TwitterWorker tw = new TwitterWorker(MainActivity.this);
 			tw.sendTweet(getPostBody(), getPictureFileName());
@@ -241,6 +282,7 @@ public class MainActivity extends Activity implements LocationListener {
 			}
 		}
 
+		// send e-mail to recipient list. if list is empty nothing will happen it return immediately
 		new AsyncMailSender(MainActivity.this, getCoordinatesString(),
 				getPictureFileName(), recipientEmailList).execute();
 
@@ -250,10 +292,12 @@ public class MainActivity extends Activity implements LocationListener {
 			e.printStackTrace();
 		}
 		
+		// send SMS to recipient list. if list is empty nothing will happen it return immediately
 		new AsyncSmsSender(MainActivity.this, getCoordinatesString(),
 				recipientPhoneNumberList).execute();
 	}
 
+	// "Organize e-mail & recipients" button listener object
 	private OnClickListener recipientsButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -263,6 +307,7 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	};
 
+	// "Where am I?" button listener object
 	private OnClickListener mapsButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -272,6 +317,7 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	};
 
+	// "Enable/Disable Twitter" button listener object
 	private OnClickListener loginTwitterButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -279,6 +325,8 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	};
 
+	// if Twitter session is empty logs into Twitter using OAuth from Twitter API
+	// else logs out by clearing the Twitter Session 
 	public void loginToTwitter() {
 		if (mAuthTask != null)
 			return;
@@ -297,6 +345,7 @@ public class MainActivity extends Activity implements LocationListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		// construct db variables
 		db = new MySQLLiteHelper(this);
 
 		recipientEmailList = new ArrayList<String>();
@@ -323,7 +372,7 @@ public class MainActivity extends Activity implements LocationListener {
 			Toast.makeText(this, "No camera on this device", Toast.LENGTH_LONG)
 					.show();
 		} else {
-
+			// Prepare in advance to shoot the picture
 			try {
 				SurfaceView sw = new SurfaceView(getApplicationContext());
 				SurfaceHolder mySurfaceHolder = sw.getHolder();
@@ -334,6 +383,7 @@ public class MainActivity extends Activity implements LocationListener {
 			}
 		}
 
+		// Facebook API initializations
 		uiHelper = new UiLifecycleHelper(this, callback);
 		uiHelper.onCreate(savedInstanceState);
 
@@ -343,6 +393,7 @@ public class MainActivity extends Activity implements LocationListener {
 			pendingAction = PendingAction.valueOf(name);
 		}
 
+		// Set up main activity screen
 		setContentView(R.layout.activity_main);
 
 		littleRedButton = (Button) findViewById(R.id.littleRedButton);
@@ -374,6 +425,7 @@ public class MainActivity extends Activity implements LocationListener {
 		canPresentShareDialog = FacebookDialog.canPresentShareDialog(this,
 				FacebookDialog.ShareDialogFeature.SHARE_DIALOG);
 		
+		// Construct Twitter Session object
 		twitterSession = new TwitterSession(this);
 
 		// Check if Internet present
@@ -395,6 +447,7 @@ public class MainActivity extends Activity implements LocationListener {
 			return;
 		}
 
+		// Get location and update info label with current coordinates
 		Location location = getLocation();
 		if (location != null)
 			infoLabel.setText("Coordinates:\nLat: "
@@ -417,6 +470,8 @@ public class MainActivity extends Activity implements LocationListener {
 		outState.putString(PENDING_ACTION_BUNDLE_KEY, pendingAction.name());
 	}
 
+	// called when main activity resumes
+	// used by Twitter API to get access tokens after the user logs in using AuthenticationTask object
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
@@ -431,6 +486,7 @@ public class MainActivity extends Activity implements LocationListener {
 						+ uri.getScheme().toString());
 				String verifier = uri
 						.getQueryParameter(Constants.URL_TWITTER_OAUTH_VERIFIER);
+				// Get access tokens to Twitter
 				mAccessTokenTask = new RetriveAcessTokenTask();
 				mAccessTokenTask.execute(verifier);
 			}
@@ -460,6 +516,7 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	}
 
+	// used to check Facebook permissions are set properly
 	private boolean isSubsetOf(Collection<String> subset,
 			Collection<String> superset) {
 		for (String string : subset) {
@@ -482,6 +539,7 @@ public class MainActivity extends Activity implements LocationListener {
 		uiHelper.onDestroy();
 	}
 
+	// Used to check whether the user granted permissions to use LittleRedButton to post messages to Facebook
 	private void onSessionStateChange(Session session, SessionState state,
 			Exception exception) {
 		if (pendingAction != PendingAction.NONE
@@ -514,6 +572,7 @@ public class MainActivity extends Activity implements LocationListener {
 		return true;
 	}
 
+	// Get current GPS location coordinates
 	public Location getLocation() {
 		Location location = null;
 		try {
@@ -603,6 +662,7 @@ public class MainActivity extends Activity implements LocationListener {
 		alertDialog.show();
 	}
 
+	// When current location is changed inform the user
 	@Override
 	public void onLocationChanged(Location location) {
 		if (location != null)
@@ -628,6 +688,7 @@ public class MainActivity extends Activity implements LocationListener {
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 	}
 
+	// Constructs a part of emergency message that contains coordinates data
 	public String getCoordinatesString() {
 		Location location = getLocation();
 		if (location != null)
@@ -637,6 +698,7 @@ public class MainActivity extends Activity implements LocationListener {
 			return "Unkown!";
 	}
 
+	// Updates Twitter button according to the current state of Twitter Session
 	public void updateUI() {
 		if (twitterSession.isTwitterLoggedInAlready())
 			loginTwitterButton.setText("Disable Twitter");
@@ -644,6 +706,7 @@ public class MainActivity extends Activity implements LocationListener {
 			loginTwitterButton.setText("Enable Twitter");
 	}
 
+	// Starts Facebook post in case of a change in PendingAction from NONE to POST_PHOTO 
 	@SuppressWarnings("incomplete-switch")
 	private void handlePendingAction() {
 		Log.d("FB", "handlependingaction");
@@ -660,6 +723,7 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	}
 
+	// Informs the user about Facebook posts
 	private void showPublishResult(String message, GraphObject result,
 			FacebookRequestError error) {
 		if (error == null)
@@ -670,6 +734,7 @@ public class MainActivity extends Activity implements LocationListener {
 					.show();
 	}
 
+	// Posts the photo and the emergency message to Facebook
 	private void postPhoto() {
 		Log.d("FB", "postphoto");
 		Bitmap image = BitmapFactory.decodeFile(getPictureFileName());
@@ -700,6 +765,7 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	}
 
+	// Constructs the message to be sent as emergency message
 	private String getPostBody() {
 		SharedPreferences sharedPrefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
@@ -714,12 +780,15 @@ public class MainActivity extends Activity implements LocationListener {
 		return postBody;
 	}
 
+	// Facebook permissions control
 	private boolean hasPublishPermission() {
 		Session session = Session.getActiveSession();
 		return session != null
 				&& session.getPermissions().contains("publish_actions");
 	}
 
+	// starts Facebook post if the permissions are set properly
+	// else first requests the user for permissions and continue
 	private void performPublish(PendingAction action, boolean allowNoSession) {
 		Log.d("FB", "performpublish");
 		Session session = Session.getActiveSession();
@@ -754,6 +823,7 @@ public class MainActivity extends Activity implements LocationListener {
 		this.pictureFileName = pictureFileName;
 	}
 
+	// Async object that shoots the photo
 	public class SavePhotoTask extends AsyncTask<Boolean, Void, File> implements
 			PictureCallback {
 
@@ -785,6 +855,7 @@ public class MainActivity extends Activity implements LocationListener {
 			startNotifications();
 		}
 
+		// When the photo data has been produced save it to desired location on sdcard with a defined name
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
 			File pictureFileDir = getDir();
@@ -825,6 +896,7 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	}
 
+	// Async object that runs just after user logs into Twitter to get access tokens to Twitter servers
 	public class RetriveAcessTokenTask extends
 			AsyncTask<String, Integer, Boolean> {
 		ProgressDialog pDialog;
@@ -884,6 +956,7 @@ public class MainActivity extends Activity implements LocationListener {
 		}
 	}
 
+	// Async object that is used to log the user to Twitter
 	public class AuthenticationTask extends AsyncTask<Void, Void, Boolean> {
 		ProgressDialog dialog;
 
@@ -898,6 +971,7 @@ public class MainActivity extends Activity implements LocationListener {
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
+			// Set twitter credentials
 			ConfigurationBuilder builder = new ConfigurationBuilder();
 			builder.setOAuthConsumerKey(Constants.TWITTER_CONSUMER_KEY);
 			builder.setOAuthConsumerSecret(Constants.TWITTER_CONSUMER_SECRET);
@@ -920,6 +994,7 @@ public class MainActivity extends Activity implements LocationListener {
 			return false;
 		}
 
+		// if successful directs the application to twitter authentication URL
 		@Override
 		protected void onPostExecute(Boolean result) {
 			super.onPostExecute(result);

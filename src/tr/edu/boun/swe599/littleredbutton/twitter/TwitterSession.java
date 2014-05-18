@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.twitter;
 
 import twitter4j.Twitter;
@@ -50,6 +61,7 @@ public class TwitterSession {
 		return mSharedPreferences.getString(Constants.TWITTER_USER_NAME, "");
 	}
 	public void logout(){
+		// clear twitter credentials from sharedpreferences
 		Editor e = mSharedPreferences.edit();
 		e.remove(Constants.PREF_KEY_OAUTH_TOKEN);
 		e.remove(Constants.PREF_KEY_OAUTH_SECRET);

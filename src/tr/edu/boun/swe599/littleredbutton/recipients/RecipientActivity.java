@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.recipients;
 
 import java.util.ArrayList;
@@ -24,7 +35,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 public class RecipientActivity extends Activity {
-
+	// This class is used to add/delete/display the recipients of the application
 	static final int PICK_CONTACT = 1;
 	private TableLayout tableLayout;
 	
@@ -39,6 +50,7 @@ public class RecipientActivity extends Activity {
 		}
 	};
 
+	// Show all contacts from the phone memory
 	private OnClickListener allContactsButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -48,6 +60,7 @@ public class RecipientActivity extends Activity {
 		}
 	};
 
+	// Add a new recipient by opening the phonebook and letting the user to select one
 	private OnClickListener addRecipientButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -82,6 +95,7 @@ public class RecipientActivity extends Activity {
 			recipientNameList.add(recipient.getRecipientName());
 		}
 		
+		// display current recipients
 		for(int i=0; i<recipientNameList.size(); i++)  {
 	        final TableRow tableRow = new TableRow(this);
 	        tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
@@ -92,6 +106,7 @@ public class RecipientActivity extends Activity {
 	        text.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
 	        text.setPadding(20, 0, 10, 0);
 
+	        // The button to delete a recipient
 	        final Button button = new Button(this);
 	        button.setText("    Delete    ");
 	        button.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT));
@@ -120,15 +135,18 @@ public class RecipientActivity extends Activity {
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public void onActivityResult(int reqCode, int resultCode, Intent data) {
+		// Used when the user selected a contact from his phone memory
 		super.onActivityResult(reqCode, resultCode, data);
 		
 		Recipient recipient = new Recipient();
 		
+		// Get the selected contact data
 		Uri contact = data.getData();
 		ContentResolver cr = getContentResolver();
 		Cursor c = managedQuery(contact, null, null, null, null);
 		c.moveToFirst();
-
+		// Extract contact's data and contruct a recipient from it
+		// after construction add it both to db table and the recipient table dsiplayed to the user on the screen
 		String id = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
 
 		recipient.setRecipientName( c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)));

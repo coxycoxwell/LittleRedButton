@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.twitter;
 
 import java.io.File;
@@ -41,6 +52,7 @@ public class TwitterWorker {
 					.show();
 	}
 
+	// Async class used to update user's twitter status
 	class UpdateTwitterStatusTask extends AsyncTask<String, String, Boolean> {
 		/**
 		 * Before starting background thread Show Progress Dialog
@@ -53,9 +65,6 @@ public class TwitterWorker {
 					.show();
 		}
 
-		/**
-		 * getting Places JSON
-		 * */
 		protected Boolean doInBackground(String... args) {
 			Log.d("Tweet Text", "> " + args[0]);
 			Log.d("Tweet Pic", "> " + args[1]);
@@ -90,15 +99,9 @@ public class TwitterWorker {
 			return false;
 		}
 
-		/**
-		 * After completing background task Dismiss the progress dialog and show
-		 * the data in UI Always use runOnUiThread(new Runnable()) to update UI
-		 * from background thread, otherwise you will get error
-		 * **/
 		@Override
 		protected void onPostExecute(Boolean results) {
-			// dismiss the dialog after getting all products
-			// TODO Auto-generated method stub
+			// dismiss the dialog
 			mStatusTask = null;
 			if (results) {
 				Toast.makeText(context, "Tweeted successfully!",

@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.recipients;
 
 import java.util.LinkedList;
@@ -11,7 +22,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class MySQLLiteHelper extends SQLiteOpenHelper {
-
+	// Handles the db operations of recipient db table
 	private static final String TABLE_RECIPIENT = "recipient";
 	private static final String KEY_RECIPIENTNAME = "recipientname";
 	private static final String KEY_RECIPIENTEMAILADDRESS = "recipientemailaddress";
@@ -29,6 +40,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
+	// create recipient table on db
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		String CREATE_RECIPIENT_TABLE = "CREATE TABLE recipient ( "
@@ -38,6 +50,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 		db.execSQL(CREATE_RECIPIENT_TABLE);
 	}
 
+	// if the application is updated drops the db
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL("DROP TABLE IF EXISTS recipient");
@@ -75,6 +88,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 		if (cursor != null)
 			cursor.moveToFirst();
 
+		// construct returning recipient object
 		Recipient recipient = new Recipient();
 		recipient.setRecipientName(cursor.getString(0));
 		recipient.setRecipientEmailAddress(cursor.getString(1));
@@ -84,6 +98,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 		return recipient;
 	}
 
+	// returns all recipients in db table
 	public List<Recipient> getAllRecipient() {
 		List<Recipient> recipients = new LinkedList<Recipient>();
 
@@ -107,6 +122,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 		return recipients;
 	}
 
+	// update a recipient with its new values
 	public int updateRecipient(Recipient recipient) {
 
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -124,6 +140,7 @@ public class MySQLLiteHelper extends SQLiteOpenHelper {
 		return i;
 	}
 
+	// deletes a recipient from the table
 	public void deleteRecipient(Recipient recipient) {
 
 		SQLiteDatabase db = this.getWritableDatabase();

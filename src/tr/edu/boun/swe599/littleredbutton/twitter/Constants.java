@@ -1,7 +1,19 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.twitter;
 
 public class Constants {
 
+	// Constant values that are to be used for Twitter API usage
 	public static String TWITTER_CONSUMER_KEY = "hMwP3z6FasAUHZ3dfKuFw";
 	public static String TWITTER_CONSUMER_SECRET = "The2eTRzJNhHfwEelUaTmn1XBAYKzUyK6w8xwE4Je4";
 	// Preference Constants

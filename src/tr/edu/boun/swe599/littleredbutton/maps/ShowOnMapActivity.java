@@ -1,3 +1,14 @@
+/*
+ * 
+ * Bogazici University
+ * MS in Software Engineering
+ * SWE 599 - Project
+ * 
+ * Mustafa Goksu GURKAS
+ * ID: 2011719225
+ * 
+ * */
+
 package tr.edu.boun.swe599.littleredbutton.maps;
 
 import java.io.BufferedReader;
@@ -34,7 +45,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class ShowOnMapActivity extends FragmentActivity implements LocationListener {
-    
+
+	// Displays the user's current GPS Location coordinates and nearest places on GoogleMaps
     GoogleMap mGoogleMap;    
     
     double mLatitude=0;
